@@ -1,0 +1,51 @@
+# global variables
+CMC_URL="https://api.coinmarketcap.com/v1/ticker"
+CMC_PRICE="price_usd"
+CURL="curl -s --connect-timeout 2 -m 5 --write-out \n\n%{http_code}"
+
+
+# global functions
+function amount_format() {
+  tac | whitespaces | awk 'NR%2==1{printf "%s ",$0;next}{print $0}' | awk '{print $2,$4}' | sed_clean | remove_empty
+}
+function amount_rev() {
+  awk '{print $2, $1}' | remove_empty
+}
+function calc() {
+  sed -e "s/'//g" -e 's/,/./g' -e 's/[eE]+*/\*10\^/' | bc -l | sed -e 's/\.*0*$//' -e 's/^\./0./'
+}
+function format() {
+  rev | sed "s/.\{3\}/&'/g" | rev | sed -e "s/^'//"
+}
+function format_output() {
+  FULL="$(echo "${1}" | awk -F'.' '{print $1}' | format)"
+
+  FRCT="$(echo "${1}" | awk -F'.' '{print $2}' | sed 's/0*$//')"
+  if [[ ! -z "${FRCT}" ]]; then
+    FULL+=".${FRCT:0:2}"
+  fi
+}
+function http_check() {
+  tail -1 | grep -q "^200$"
+}
+function mjson() {
+  head -1 | python -mjson.tool 2> /dev/null
+}
+function output_format() {
+  sed 's/^/  - /' | sed 's/\.0*$//'
+}
+function remove_empty() {
+  grep -vE "[ \t]0.0*$|[ \t]0$"
+}
+function sed_clean() {
+  sed -e 's/"//g' -e 's/,//g'
+}
+function sha256_hmac() {
+  openssl dgst -sha256 -hmac ${1} | awk '{print $NF}'
+}
+function sha512_hmac() {
+  openssl dgst -sha512 -hmac ${1} | awk '{print $NF}'
+}
+function whitespaces(){
+  sed -e 's/^[ \t]*//' -e 's/[ \t]*$//'
+}
