@@ -11,17 +11,18 @@ if [[ ! -f "${CONF}" ]]; then
   exit 1
 fi
 
+
+# source global functions
+. /opt/crypto_functions
+
+
 # get seconds
 SECS="$(date '+%S' | sed 's/^0//')"
 
 # run only in terminal or at specific times
 if tty -s || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
-  # run files
+  # remove old files
   rm -rf ${FILE}
-
-
-  # source global functions
-  . /opt/crypto_functions
 
 
   # wallet functions
@@ -141,12 +142,14 @@ if tty -s; then
   fi
 
 else
-  echo -n " | Wallets: "
+  if [[ ! -f "${NOCRYPTO}" ]]; then
+    echo -n " | Wallets: "
 
-  if [[ -s "${FILE}_usd" ]]; then
-    echo -n "$(cat ${FILE}_usd)\$"
-  else
-    echo -n "0\$"
+    if [[ -s "${FILE}_usd" ]]; then
+      echo -n "$(cat ${FILE}_usd)\$"
+    else
+      echo -n "0\$"
+    fi
   fi
 fi
 

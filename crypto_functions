@@ -2,6 +2,7 @@
 CMC_URL="https://api.coinmarketcap.com/v1/ticker"
 CMC_PRICE="price_usd"
 CURL="curl -s --connect-timeout 2 -m 5 --write-out \n\n%{http_code}"
+NOCRYPTO="${HOME}/.nocrypto"
 
 
 # global functions
