@@ -1,10 +1,11 @@
 #!/bin/bash
-PATH="/usr/local/bin:/usr/bin:/bin"
+PATH="/bin:/usr/bin:/usr/local/bin"
 
 
 # variables
 CONF="${HOME}/.crypto/wallets"
-FILE="/tmp/$(basename ${0})"
+FILE="/tmp/crypto_wallets"
+NEWFILE="${FILE}_$(date '+%s%N'))"
 if [[ ! -f "${CONF}" ]]; then
   echo -e "\n${CONF} is missing. Not running.\n"
   echo -e "File format:\ncurrency=\"wallet1 wallet2 wallet3\"\n"
@@ -13,7 +14,16 @@ fi
 
 
 # source global functions
-. /opt/crypto_functions
+if [[ -f "$(dirname ${0})/crypto_functions" ]]; then
+  . $(dirname ${0})/crypto_functions
+
+elif [[ -f "/opt/crypto_functions" ]]; then
+  . /opt/crypto_functions
+
+else
+  echo -e "\nError: crypto_functions can't be sourced.\n"
+  exit 1
+fi
 
 
 # get seconds
@@ -21,10 +31,6 @@ SECS="$(date '+%S' | sed 's/^0//')"
 
 # run only in terminal or at specific times
 if tty -s || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
-  # remove old files
-  rm -rf ${FILE}
-
-
   # wallet functions
 
   function cmc() {
@@ -97,7 +103,7 @@ if tty -s || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
         CURRENCY_PRICE="$(echo "${CALL}" | grep "\"${CMC_PRICE}\": " | awk '{print $2}' | sed_clean)"
         WORTH="$(echo "${CURRENCY_PRICE} * ${TOTAL}" | calc)"
         if [[ ! -z "${WORTH}" ]]; then
-          echo "${WORTH}" >> ${FILE}
+          echo "${WORTH}" >> ${NEWFILE}
         fi
       fi
 
@@ -117,7 +123,10 @@ if tty -s || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
 
 
   # get total output
-  if [[ -s "${FILE}" ]]; then
+  if [[ -s "${NEWFILE}" ]]; then
+    # overwrite output file
+    mv ${NEWFILE} ${FILE}
+
     # get total bitcoin amount
     USD_TOTAL="$(cat ${FILE} | tr '\n' '+' | sed 's/+$/\n/' | calc)"
 

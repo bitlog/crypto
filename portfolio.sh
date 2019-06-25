@@ -1,14 +1,24 @@
 #!/bin/bash
-PATH="/usr/local/bin:/usr/bin:/bin"
+PATH="/bin:/usr/bin:/usr/local/bin"
 
 
 # variables
-EXCH_FILE="/tmp/exchanges_usd"
-WALL_FILE="/tmp/wallets_usd"
+FILE="/tmp/crypto_"
+EXCH_FILE="${FILE}exchanges_usd"
+WALL_FILE="${FILE}wallets_usd"
 
 
 # source global functions
-. /opt/crypto_functions
+if [[ -f "$(dirname ${0})/crypto_functions" ]]; then
+  . $(dirname ${0})/crypto_functions
+
+elif [[ -f "/opt/crypto_functions" ]]; then
+  . /opt/crypto_functions
+
+else
+  echo -e "\nError: crypto_functions can't be sourced.\n"
+  exit 1
+fi
 
 
 # get exchanges total

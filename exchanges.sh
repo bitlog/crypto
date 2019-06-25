@@ -1,10 +1,11 @@
 #!/bin/bash
-PATH="/usr/local/bin:/usr/bin:/bin"
+PATH="/bin:/usr/bin:/usr/local/bin"
 
 
 # variables
 CONF="${HOME}/.crypto/exchanges"
-FILE="/tmp/$(basename ${0})"
+FILE="/tmp/crypto_exchanges"
+NEWFILE="${FILE}_$(date '+%s%N'))"
 if [[ ! -f "${CONF}" ]]; then
   echo -e "\n${CONF} is missing. Not running.\n"
   echo -e "File format:\nexchange_name=\"api_key secret_key\"\n"
@@ -13,7 +14,16 @@ fi
 
 
 # source global functions
-. /opt/crypto_functions
+if [[ -f "$(dirname ${0})/crypto_functions" ]]; then
+  . $(dirname ${0})/crypto_functions
+
+elif [[ -f "/opt/crypto_functions" ]]; then
+  . /opt/crypto_functions
+
+else
+  echo -e "\nError: crypto_functions can't be sourced.\n"
+  exit 1
+fi
 
 
 # get seconds
@@ -21,10 +31,6 @@ SECS="$(date '+%S' | sed 's/^0//')"
 
 # run only in terminal or at specific times
 if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
-  # remove old file
-  rm -rf ${FILE}
-
-
   # exchange functions
 
   function exchange_currency() {
@@ -133,7 +139,7 @@ if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
 
           # get btc directly
           if [[ "${c}" == "BTC" ]]; then
-            echo "${AMT}" >> ${FILE}
+            echo "${AMT}" >> ${NEWFILE}
             WORTH="${AMT}"
 
           # convert sat into btc
@@ -148,7 +154,7 @@ if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
 
           # output into file for total calucalations
           if [[ ! -z "${WORTH}" ]]; then
-            echo "${WORTH}" >> ${FILE}
+            echo "${WORTH}" >> ${NEWFILE}
           fi
         done
       fi
@@ -157,7 +163,10 @@ if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
 
 
   # get total output
-  if [[ -s "${FILE}" ]]; then
+  if [[ -s "${NEWFILE}" ]]; then
+    # overwrite output file
+    mv ${NEWFILE} ${FILE}
+
     # get total bitcoin amount
     BTC_TOTAL="$(cat ${FILE} | tr '\n' '+' | sed 's/+$/\n/' | calc)"
 
