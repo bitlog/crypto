@@ -16,7 +16,10 @@ function amount_rev() {
   awk '{print $2, $1}' | remove_empty
 }
 function calc() {
-  sed -e "s/'//g" -e 's/,/./g' -e 's/[eE]+*/\*10\^/' | bc -l | sed -e 's/\.*0*$//' -e 's/^\./0./'
+  sed -e "s/'//g" -e 's/,/./g' -e 's/[eE]+*/\*10\^/' | bc -l | sed -e 's/^\./0./' -e 's/\.0*$//'
+}
+function calc_clean() {
+  sed -e 's/\.*0*$//' -e 's/^\./0./'
 }
 function cmc() {
   CMC_URL="https://api.coinmarketcap.com/v1/ticker"
@@ -42,6 +45,9 @@ function mjson() {
 }
 function output_format() {
   sed 's/^/  - /' | sed 's/\.0*$//'
+}
+function newline_calc() {
+  tr '\n' '+' | sed 's/+$/\n/'
 }
 function remove_empty() {
   grep -vE "[ \t]0.0*$|[ \t]0$"

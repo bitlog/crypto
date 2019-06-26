@@ -45,7 +45,7 @@ if tty -s || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
     URL="https://api.etherscan.io/api?module=account&action=balancemulti&address="
     URL_END="&tag=latest&apikey=YourApiKeyToken"
     BALANCE="balance"
-    CALC="/ 1000000000"
+    CALC="/ 1000000000000000000"
     CMC="ethereum"
   }
   function NAV_wallet() {
@@ -67,7 +67,7 @@ if tty -s || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
 
     # start output
     if tty -s; then
-      echo -e "\n${i}:"
+      echo -en "\n${i}: "
     fi
 
     # get wallet contents
@@ -108,13 +108,12 @@ if tty -s || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
       format_output ${TOTAL}
 
       if tty -s; then
-        echo "${i} ${FULL}" | output_format
-        echo "USD: ${WORTH}"
+        echo "${FULL} (USD ${WORTH})"
       fi
 
     else
       if tty -s; then
-        echo "Empty" | output_format
+        echo "Empty"
       fi
     fi
   done
@@ -126,7 +125,7 @@ if tty -s || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
     mv ${NEWFILE} ${FILE}
 
     # get total bitcoin amount
-    USD_TOTAL="$(cat ${FILE} | tr '\n' '+' | sed 's/+$/\n/' | calc)"
+    USD_TOTAL="$(cat ${FILE} | newline_calc | calc)"
 
     # get and format usd
     format_output ${USD_TOTAL}

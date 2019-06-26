@@ -108,7 +108,7 @@ if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
     # get output if call was successful
     if echo "${CALL}" | http_check; then
       OUTPUT="$(echo "${CALL}" | mjson)"
-    
+
       if [[ ! -z "${OUTPUT}" ]]; then
         # get total amount of cryptocurrencies in account
         ${i}_amounts
@@ -118,16 +118,7 @@ if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
           echo -e "\n${i}:"
 
           # check if amount is not empty
-          if [[ ! -z "${AMOUNTS}" ]]; then
-            while read line; do
-              # get and format amounts
-              CURRENCY="$(echo "${line}" | awk '{print $1}')"
-              VALUE="$(echo "${line}" | awk '{print $2}')"
-              format_output ${VALUE}
-              echo "${CURRENCY} ${FULL}" | output_format
-            done <<< "${AMOUNTS}"
-
-          else
+          if [[ -z "${AMOUNTS}" ]]; then
             echo "Empty" | output_format
           fi
         fi
@@ -136,11 +127,15 @@ if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
         # calculate total of amounts
         for c in $(echo "${AMOUNTS}" | awk '{print $1}'); do
           AMT="$(echo "${AMOUNTS}" | grep "^${c} " | awk '{print $2}')"
+          WORTH=""
 
           # get btc directly
           if [[ "${c}" == "BTC" ]]; then
             echo "${AMT}" >> ${NEWFILE}
-            WORTH="${AMT}"
+
+          # get usdt directly
+          elif [[ "${c}" == "USDT" ]]; then
+            echo "${AMT}" >> ${NEWFILE}_usdt
 
           # convert sat into btc
           elif [[ "${c}" == "XBt" ]]; then
@@ -155,10 +150,18 @@ if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
           # output into file for total calucalations
           if [[ ! -z "${WORTH}" ]]; then
             echo "${WORTH}" >> ${NEWFILE}
-            if tty -s; then
-              format_output ${WORTH}
-              echo "BTC: ${FULL}"
+            format_output ${WORTH}
+            WORTH="${FULL}"
+          fi
+
+          if [[ ! -z "${AMT}" ]]; then
+            # output
+            format_output ${AMT}
+            OUTPUT="${FULL}"
+            if [[ ! -z "${WORTH}" ]]; then
+              OUTPUT+=" (BTC ${WORTH})"
             fi
+            echo "${c} ${OUTPUT}" | output_format
           fi
         done
       fi
@@ -168,11 +171,19 @@ if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
 
   # get total output
   if [[ -s "${NEWFILE}" ]]; then
+    # overwrite usdt output file
+    if [[ -f "${NEWFILE}_usdt" ]]; then
+      mv ${NEWFILE}_usdt ${FILE}_usdt
+      USDT_TOTAL="$(cat ${FILE}_usdt | newline_calc | calc)"
+    else
+      rm -rf ${FILE}_usdt
+    fi
+
     # overwrite output file
     mv ${NEWFILE} ${FILE}
 
     # get total bitcoin amount
-    BTC_TOTAL="$(cat ${FILE} | tr '\n' '+' | sed 's/+$/\n/' | calc)"
+    BTC_TOTAL="$(cat ${FILE} | newline_calc | calc)"
 
     # get and format btc
     format_output ${BTC_TOTAL}
@@ -187,7 +198,12 @@ if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
         BTC_PRICE="$(echo "${CALL}" | grep "\"${CMC_PRICE}\": " | awk '{print $2}' | sed_clean)"
 
         if [[ ! -z "${BTC_PRICE}" ]]; then
-          USD_TOTAL="$(echo "${BTC_PRICE} * ${BTC_TOTAL}" | calc)"
+          # calculate total usd
+          CALCLINE="(${BTC_PRICE} * ${BTC_TOTAL})"
+          if [[ ! -z "${USDT_TOTAL}" ]]; then
+            CALCLINE+=" + ${USDT_TOTAL}"
+          fi
+          USD_TOTAL="$(echo "${CALCLINE}" | calc)"
 
           # get and format usd
           format_output ${USD_TOTAL}
@@ -207,7 +223,7 @@ if tty -s; then
     if [[ ! -z "${FULL}" ]]; then
       echo -e "USD ${FULL}" | output_format
     fi
-    
+
   else
     echo "None" | output_format
     echo
@@ -223,7 +239,7 @@ else
         echo -n " ($(cat ${FILE}_btc)B)"
       fi
     else
-      echo -n "0\$"
+      echo -n "0 \$"
     fi
   fi
 fi

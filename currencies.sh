@@ -80,7 +80,7 @@ if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
   CALL="$(${CURL} ${RATE_URL})"
   if echo "${CALL}" | http_check; then
     USD_RATE="$(echo "${CALL}" | mjson | grep "\"CHF\": " | awk '{print $2}' | sed_clean)"
-    
+
     if [[ ! -z "${USD_RATE}" ]]; then
       format_output ${USD_RATE}
       USD="${FULL}"
