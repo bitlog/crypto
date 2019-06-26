@@ -155,6 +155,10 @@ if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
           # output into file for total calucalations
           if [[ ! -z "${WORTH}" ]]; then
             echo "${WORTH}" >> ${NEWFILE}
+            if tty -s; then
+              format_output ${WORTH}
+              echo "BTC ${FULL}" | output_format
+            fi
           fi
         done
       fi
@@ -214,7 +218,7 @@ else
     echo -n " | Exchanges: "
 
     if [[ -s "${FILE}_usd" ]]; then
-      echo -n "$(cat ${FILE}_usd)\$"
+      echo -n "$(cat ${FILE}_usd)"
       if [[ -s "${FILE}_btc" ]]; then
         echo -n " ($(cat ${FILE}_btc)B)"
       fi

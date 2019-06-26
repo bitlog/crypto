@@ -78,8 +78,8 @@ if tty -s || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
 
     # get wallet contents
     OUTPUT="0"
-    for i in ${WALLETS}; do
-      CALL="$(${CURL} ${URL}${i}${URL_END})"
+    for c in ${WALLETS}; do
+      CALL="$(${CURL} ${URL}${c}${URL_END})"
 
       # get output if call was successful
       if echo "${CALL}" | http_check; then
@@ -99,11 +99,14 @@ if tty -s || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
 
       # get currency price
       cmc
+      WORTH="0"
       if echo "${CALL}" | http_check; then
         CURRENCY_PRICE="$(echo "${CALL}" | grep "\"${CMC_PRICE}\": " | awk '{print $2}' | sed_clean)"
         WORTH="$(echo "${CURRENCY_PRICE} * ${TOTAL}" | calc)"
         if [[ ! -z "${WORTH}" ]]; then
           echo "${WORTH}" >> ${NEWFILE}
+          format_output ${WORTH}
+          WORTH="${FULL}"
         fi
       fi
 
@@ -111,7 +114,8 @@ if tty -s || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
       format_output ${TOTAL}
 
       if tty -s; then
-        echo "${FULL}" | output_format
+        echo "${i} ${FULL}" | output_format
+        echo "USD ${WORTH}" | output_format
       fi
 
     else
@@ -155,9 +159,9 @@ else
     echo -n " | Wallets: "
 
     if [[ -s "${FILE}_usd" ]]; then
-      echo -n "$(cat ${FILE}_usd)\$"
+      echo -n "$(cat ${FILE}_usd)"
     else
-      echo -n "0\$"
+      echo -n "0"
     fi
   fi
 fi

@@ -53,7 +53,7 @@ if tty -s; then
 
 else
   if [[ ! -f "${NOCRYPTO}" ]]; then
-    echo -n " | Portfolio: ${FULL}\$"
+    echo -n " | Portfolio: ${FULL}"
   fi
 fi
 exit 0
