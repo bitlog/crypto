@@ -106,7 +106,9 @@ fi
 
 # output
 if ! tty -s; then
-  cat ${FILE}
+  if [[ ! -f "${NOCRYPTO}" ]]; then
+    cat ${FILE}
+  fi
 fi
 
 
