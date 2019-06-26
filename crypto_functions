@@ -1,7 +1,9 @@
 # global variables
+DEFAULT_CRC="bitcoin ethereum"
 CMC_URL="https://api.coinmarketcap.com/v1/ticker"
 CMC_PRICE="price_usd"
 CMC_SYMBOL="symbol"
+RATE_URL="https://api.exchangeratesapi.io/latest?base=USD&symbols=CHF"
 CURL="curl -s --connect-timeout 2 -m 5 --write-out \n\n%{http_code}"
 NOCRYPTO="${HOME}/.nocrypto"
 
@@ -15,6 +17,11 @@ function amount_rev() {
 }
 function calc() {
   sed -e "s/'//g" -e 's/,/./g' -e 's/[eE]+*/\*10\^/' | bc -l | sed -e 's/\.*0*$//' -e 's/^\./0./'
+}
+function cmc() {
+  CMC_URL="https://api.coinmarketcap.com/v1/ticker"
+
+  CALL="$(${CURL} ${CMC_URL}/${CMC}/)"
 }
 function format() {
   rev | sed "s/.\{3\}/&'/g" | rev | sed -e "s/^'//"

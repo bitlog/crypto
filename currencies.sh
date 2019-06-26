@@ -5,7 +5,6 @@ PATH="/bin:/usr/bin:/usr/local/bin"
 # variables
 CONF="${HOME}/.crypto/currencies"
 FILE="/tmp/crypto_currencies"
-NEWFILE="${FILE}_$(date '+%s%N'))"
 if [[ ! -f "${CONF}" ]]; then
   echo -e "\n${CONF} is missing. Not running.\n"
   echo -e "File format:\ncurrency1 currency2 currency3\ncurrency4\n"
@@ -31,21 +30,23 @@ SECS="$(date '+%S' | sed 's/^0//')"
 
 # run only in terminal or at specific times
 if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
-  # wallet functions
+  # get currencies without default currencies
+  CRC="$(grep -vE "^\#|^[ \t]*$" ${CONF} | sed 's/  */ /g' | tr ' ' '\n' | sort -u)"
+  for i in ${DEFAULT_CRC}; do
+    CRC="$(echo "${CRC}" | grep -v "^${i}$")"
+  done
 
-  function cmc() {
-    CMC_URL="https://api.coinmarketcap.com/v1/ticker"
+  # add default currencies
+  CURRENCIES="${DEFAULT_CRC} ${CRC}"
 
-    CALL="$(${CURL} ${CMC_URL}/${CMC}/)"
-  }
-
-  # run through all wallets
-  for i in $(grep -vE "^\#|^[ \t]*$" ${CONF} | sed 's/  */ /g' | tr ' ' '\n' | sort -u); do
+  # run through all currencies
+  for i in ${CURRENCIES}; do
     # reset variables
     VALUE=""
 
     # get value from cmc
-    CALL="$(${CURL} "${CMC_URL}/${i}/")"
+    CMC="${i}"
+    cmc
     if echo "${CALL}" | http_check; then
       SYMBOL="$(echo "${CALL}" | grep "\"${CMC_SYMBOL}\": " | awk '{print $2}' | sed_clean)"
       VALUE="$(echo "${CALL}" | grep "\"${CMC_PRICE}\": " | awk '{print $2}' | sed_clean)"
@@ -63,20 +64,49 @@ if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
     if [[ ! -z "${VALUE}" ]]; then
       if tty -s; then
         echo -e "\n${SYMBOL}: ${WORTH}"
-
-      else
-        echo -n " | ${SYMBOL}: ${WORTH}"
       fi
+      OUTPUT+=" | ${SYMBOL}: ${WORTH}"
 
     else
       if tty -s; then
         echo -e "\n${i}: unknown"
-
-      else
-        echo -n " | ${i}: unknown"
       fi
+      OUTPUT+=" | ${i}: unknown"
     fi
   done
+
+
+  # get usd to chf exchange rate
+  CALL="$(${CURL} ${RATE_URL})"
+  if echo "${CALL}" | http_check; then
+    USD_RATE="$(echo "${CALL}" | mjson | grep "\"CHF\": " | awk '{print $2}' | sed_clean)"
+    
+    if [[ ! -z "${USD_RATE}" ]]; then
+      format_output ${USD_RATE}
+      USD="${FULL}"
+      echo "${USD}" > ${FILE}_usd
+
+    else
+      USD="0"
+    fi
+
+    if tty -s; then
+      echo -e "\nUSD: ${USD}"
+    fi
+    OUTPUT+=" | USD: ${USD}"
+  fi
+
+
+  # prepare file
+  if [[ ! -z "${OUTPUT}" ]]; then
+    echo "${OUTPUT}" > ${FILE}
+  fi
+fi
+
+
+# output
+if ! tty -s; then
+  cat ${FILE}
 fi
 
 

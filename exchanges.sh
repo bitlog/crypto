@@ -157,7 +157,7 @@ if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
             echo "${WORTH}" >> ${NEWFILE}
             if tty -s; then
               format_output ${WORTH}
-              echo "BTC ${FULL}" | output_format
+              echo "BTC: ${FULL}"
             fi
           fi
         done

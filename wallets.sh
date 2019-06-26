@@ -33,12 +33,6 @@ SECS="$(date '+%S' | sed 's/^0//')"
 if tty -s || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
   # wallet functions
 
-  function cmc() {
-    CMC_URL="https://api.coinmarketcap.com/v1/ticker"
-
-    CALL="$(${CURL} ${CMC_URL}/${CMC}/)"
-  }
-
   function BTC_wallet() {
     WALLETS="$(echo "${LINE}" | sed 's/ /|/g')"
     URL="https://blockchain.info/de/multiaddr?active="
@@ -115,7 +109,7 @@ if tty -s || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
 
       if tty -s; then
         echo "${i} ${FULL}" | output_format
-        echo "USD ${WORTH}" | output_format
+        echo "USD: ${WORTH}"
       fi
 
     else
