@@ -2,12 +2,6 @@
 PATH="/bin:/usr/bin:/usr/local/bin"
 
 
-# variables
-FILE="/tmp/crypto_"
-EXCH_FILE="${FILE}exchanges_usd"
-WALL_FILE="${FILE}wallets_usd"
-
-
 # source global functions
 if [[ -f "$(dirname ${0})/crypto_functions" ]]; then
   . $(dirname ${0})/crypto_functions
@@ -19,6 +13,12 @@ else
   echo -e "\nError: crypto_functions can't be sourced.\n"
   exit 1
 fi
+
+
+# variables
+FILE="${WORKDIR}/crypto_"
+EXCH_FILE="${FILE}exchanges_usd"
+WALL_FILE="${FILE}wallets_usd"
 
 
 # get exchanges total
@@ -51,7 +51,7 @@ if tty -s; then
   echo "USD ${FULL}" | output_format
   echo
 
-else
+elif [[ "${CRON}" == "0" ]]; then
   if [[ ! -f "${NOCRYPTO}" ]]; then
     echo -n " | Portfolio: ${FULL}"
   fi

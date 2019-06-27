@@ -2,16 +2,6 @@
 PATH="/bin:/usr/bin:/usr/local/bin"
 
 
-# variables
-CONF="${HOME}/.crypto/currencies"
-FILE="/tmp/crypto_currencies"
-if [[ ! -f "${CONF}" ]]; then
-  echo -e "\n${CONF} is missing. Not running.\n"
-  echo -e "File format:\ncurrency1 currency2 currency3\ncurrency4\n"
-  exit 1
-fi
-
-
 # source global functions
 if [[ -f "$(dirname ${0})/crypto_functions" ]]; then
   . $(dirname ${0})/crypto_functions
@@ -25,11 +15,21 @@ else
 fi
 
 
+# variables
+CONF="${HOME}/.crypto/currencies"
+FILE="${WORKDIR}/crypto_currencies"
+if [[ ! -f "${CONF}" ]]; then
+  echo -e "\n${CONF} is missing. Not running.\n"
+  echo -e "File format:\ncurrency1 currency2 currency3\ncurrency4\n"
+  exit 1
+fi
+
+
 # get seconds
 SECS="$(date '+%S' | sed 's/^0//')"
 
-# run only in terminal or at specific times
-if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
+# run only in terminal, cron or at specific times
+if tty -s || [[ "${CRON}" != "0" ]] || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
   # get currencies without default currencies
   CRC="$(grep -vE "^\#|^[ \t]*$" ${CONF} | sed 's/  */ /g' | tr ' ' '\n' | sort -u)"
   for i in ${DEFAULT_CRC}; do
@@ -105,7 +105,7 @@ fi
 
 
 # output
-if ! tty -s; then
+if ! tty -s && [[ "${CRON}" == "0" ]]; then
   if [[ ! -f "${NOCRYPTO}" ]]; then
     cat ${FILE}
   fi

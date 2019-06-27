@@ -2,17 +2,6 @@
 PATH="/bin:/usr/bin:/usr/local/bin"
 
 
-# variables
-CONF="${HOME}/.crypto/exchanges"
-FILE="/tmp/crypto_exchanges"
-NEWFILE="${FILE}_$(date '+%s%N'))"
-if [[ ! -f "${CONF}" ]]; then
-  echo -e "\n${CONF} is missing. Not running.\n"
-  echo -e "File format:\nexchange_name=\"api_key secret_key\"\n"
-  exit 1
-fi
-
-
 # source global functions
 if [[ -f "$(dirname ${0})/crypto_functions" ]]; then
   . $(dirname ${0})/crypto_functions
@@ -26,11 +15,22 @@ else
 fi
 
 
+# variables
+CONF="${HOME}/.crypto/exchanges"
+FILE="${WORKDIR}/crypto_exchanges"
+NEWFILE="${FILE}_$(date '+%s%N'))"
+if [[ ! -f "${CONF}" ]]; then
+  echo -e "\n${CONF} is missing. Not running.\n"
+  echo -e "File format:\nexchange_name=\"api_key secret_key\"\n"
+  exit 1
+fi
+
+
 # get seconds
 SECS="$(date '+%S' | sed 's/^0//')"
 
-# run only in terminal or at specific times
-if tty -s || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
+# run only in terminal, cron or at specific times
+if tty -s || [[ "${CRON}" != "0" ]] || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" -eq "45" ]]; then
   # exchange functions
 
   function exchange_currency() {
@@ -229,7 +229,7 @@ if tty -s; then
     echo
   fi
 
-else
+elif [[ "${CRON}" == "0" ]]; then
   if [[ ! -f "${NOCRYPTO}" ]]; then
     echo -n " | Exchanges: "
 
@@ -239,7 +239,7 @@ else
         echo -n " ($(cat ${FILE}_btc)B)"
       fi
     else
-      echo -n "0 \$"
+      echo -n "0"
     fi
   fi
 fi

@@ -2,17 +2,6 @@
 PATH="/bin:/usr/bin:/usr/local/bin"
 
 
-# variables
-CONF="${HOME}/.crypto/wallets"
-FILE="/tmp/crypto_wallets"
-NEWFILE="${FILE}_$(date '+%s%N'))"
-if [[ ! -f "${CONF}" ]]; then
-  echo -e "\n${CONF} is missing. Not running.\n"
-  echo -e "File format:\ncurrency=\"wallet1 wallet2 wallet3\"\n"
-  exit 1
-fi
-
-
 # source global functions
 if [[ -f "$(dirname ${0})/crypto_functions" ]]; then
   . $(dirname ${0})/crypto_functions
@@ -26,11 +15,22 @@ else
 fi
 
 
+# variables
+CONF="${HOME}/.crypto/wallets"
+FILE="${WORKDIR}/crypto_wallets"
+NEWFILE="${FILE}_$(date '+%s%N'))"
+if [[ ! -f "${CONF}" ]]; then
+  echo -e "\n${CONF} is missing. Not running.\n"
+  echo -e "File format:\ncurrency=\"wallet1 wallet2 wallet3\"\n"
+  exit 1
+fi
+
+
 # get seconds
 SECS="$(date '+%S' | sed 's/^0//')"
 
-# run only in terminal or at specific times
-if tty -s || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
+# run only in terminal, cron or at specific times
+if tty -s || [[ "${CRON}" != "0" ]] || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -eq "30" ]]; then
   # wallet functions
 
   function BTC_wallet() {
@@ -147,7 +147,7 @@ if tty -s; then
     echo
   fi
 
-else
+elif [[ "${CRON}" == "0" ]]; then
   if [[ ! -f "${NOCRYPTO}" ]]; then
     echo -n " | Wallets: "
 

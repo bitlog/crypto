@@ -8,6 +8,20 @@ CURL="curl -s --connect-timeout 2 -m 5 --write-out \n\n%{http_code}"
 NOCRYPTO="${HOME}/.nocrypto"
 
 
+# set work directory
+if [[ -z "${1}" ]]; then
+  WORKDIR="/tmp/"
+
+else
+  WORKDIR="$(echo "${1}" | sed 's/\/*$//')"
+  echo "${WORKDIR}"
+fi
+
+
+# check if run by cron
+CRON="$(pstree -s $$ | grep -c cron)"
+
+
 # global functions
 function amount_format() {
   tac | whitespaces | awk 'NR%2==1{printf "%s ",$0;next}{print $0}' | awk '{print $2,$4}' | sed_clean | remove_empty
