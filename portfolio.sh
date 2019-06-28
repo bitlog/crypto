@@ -19,6 +19,13 @@ fi
 FILE="${WORKDIR}/crypto_"
 EXCH_FILE="${FILE}exchanges_usd"
 WALL_FILE="${FILE}wallets_usd"
+FILE+="portfolio"
+
+
+# sleep when running from cron
+if [[ "${CRON}" != "0" ]]; then
+  sleep 15
+fi
 
 
 # get exchanges total
@@ -39,6 +46,7 @@ fi
 if [[ "${EXCHANGES}" != "0" ]] || [[ "${WALLETS}" != "0" ]]; then
   TOTAL="$(echo "${EXCHANGES} + ${WALLETS}" | calc)"
   format_output ${TOTAL}
+  echo "${FULL}" > ${FILE}
 
 else
   FULL="0"

@@ -16,7 +16,7 @@ fi
 
 
 # variables
-CONF="${HOME}/.crypto/currencies"
+CONF="${CONFDIR}/currencies"
 FILE="${WORKDIR}/crypto_currencies"
 if [[ ! -f "${CONF}" ]]; then
   echo -e "\n${CONF} is missing. Not running.\n"

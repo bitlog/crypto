@@ -5,21 +5,43 @@ CMC_PRICE="price_usd"
 CMC_SYMBOL="symbol"
 RATE_URL="https://api.exchangeratesapi.io/latest?base=USD&symbols=CHF"
 CURL="curl -s --connect-timeout 2 -m 5 --write-out \n\n%{http_code}"
+CONFDIR="${HOME}/.crypto"
 NOCRYPTO="${HOME}/.nocrypto"
 
+# help message
+HELP="\n${0} options:\n\n-c\n  run in cron\n-w /path/to/workdir\n  set workdir\n-h\n  show this help message\n\n"
 
-# set work directory
-if [[ -z "${1}" ]]; then
-  WORKDIR="/tmp/"
 
-else
-  WORKDIR="$(echo "${1}" | sed 's/\/*$//')"
-  echo "${WORKDIR}"
+while getopts 'cw:h' flag; do
+  case "${flag}" in
+    c) CRON='1' ;;
+    w) WDIR="${OPTARG}" ;;
+    h) echo -e "${HELP}"
+    exit 1 ;;
+  esac
+done
+
+
+# set cron
+if [[ "${CRON}" != "1" ]]; then
+  CRON="0"
 fi
 
 
-# check if run by cron
-CRON="$(pstree -s $$ | grep -c cron)"
+# set work directory
+if [[ -z "${WDIR}" ]]; then
+  WORKDIR="/tmp/"
+
+else
+  WORKDIR="$(echo "${WDIR}" | sed 's/\/*$//')"
+
+  if [[ ! -d "${WORKDIR}" ]]; then
+    if tty -s; then
+      echo -e "\n${WORKDIR} does not exist!\n"
+    fi
+    exit 1
+  fi
+fi
 
 
 # global functions

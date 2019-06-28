@@ -16,7 +16,7 @@ fi
 
 
 # variables
-CONF="${HOME}/.crypto/exchanges"
+CONF="${CONFDIR}/exchanges"
 FILE="${WORKDIR}/crypto_exchanges"
 NEWFILE="${FILE}_$(date '+%s%N'))"
 if [[ ! -f "${CONF}" ]]; then
