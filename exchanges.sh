@@ -134,7 +134,7 @@ if tty -s || [[ "${CRON}" != "0" ]] || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" 
             echo "${AMT}" >> ${NEWFILE}
 
           # get usdt directly
-          elif [[ "${c}" == "USD" ]] || [[ "${c}" == "USDT" ]] ||; then
+          elif [[ "${c}" == "USD" ]] || [[ "${c}" == "USDT" ]]; then
             echo "${AMT}" >> ${NEWFILE}_usdt
 
           # convert sat into btc
