@@ -62,6 +62,12 @@ function cmc() {
 
   CALL="$(${CURL} ${CMC_URL}/${CMC}/)"
 }
+function cron_run_portfolio() {
+  PORTFOLIO="$(find $(dirname ${0}) -type f -executable -name "*portfolio*")"
+  if [[ ! -z "${PORTFOLIO}" ]]; then
+    ${PORTFOLIO} -c -w "${WORKDIR}"
+  fi
+}
 function format() {
   rev | sed "s/.\{3\}/&'/g" | rev | sed -e "s/^'//"
 }

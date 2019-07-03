@@ -242,6 +242,9 @@ elif [[ "${CRON}" == "0" ]]; then
       echo -n "0"
     fi
   fi
+
+else
+  cron_run_portfolio
 fi
 
 

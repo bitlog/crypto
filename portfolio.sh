@@ -22,12 +22,6 @@ WALL_FILE="${FILE}wallets_usd"
 FILE+="portfolio"
 
 
-# sleep when running from cron
-if [[ "${CRON}" != "0" ]]; then
-  sleep 15
-fi
-
-
 # get exchanges total
 EXCHANGES="0"
 if [[ -s "${EXCH_FILE}" ]]; then
