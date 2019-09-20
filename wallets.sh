@@ -99,6 +99,10 @@ if tty -s || [[ "${CRON}" != "0" ]] || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -
         WORTH="$(echo "${CURRENCY_PRICE} * ${TOTAL}" | calc)"
         if [[ ! -z "${WORTH}" ]]; then
           echo "${WORTH}" >> ${NEWFILE}
+
+          format_output ${CURRENCY_PRICE}
+          PRICE="${FULL}"
+
           format_output ${WORTH}
           WORTH="${FULL}"
         fi
@@ -108,7 +112,7 @@ if tty -s || [[ "${CRON}" != "0" ]] || [[ "${SECS}" -eq "0" ]] || [[ "${SECS}" -
       format_output ${TOTAL}
 
       if tty -s; then
-        echo "${FULL} (USD ${WORTH})"
+        echo "${FULL} (Total USD ${WORTH} at price of USD ${PRICE})"
       fi
 
     else

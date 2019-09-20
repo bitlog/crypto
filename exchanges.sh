@@ -141,6 +141,10 @@ if tty -s || [[ "${CRON}" != "0" ]] || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" 
           elif [[ "${c}" == "XBt" ]]; then
             WORTH="$(echo "${AMT} / 100000000" | calc)"
 
+          # get bittrex credits
+          elif [[ "${c}" == "BTXCRD" ]]; then
+            WORTH="0"
+
           # calculate all others
           else
             ${i}_calc ${c}
@@ -204,6 +208,10 @@ if tty -s || [[ "${CRON}" != "0" ]] || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" 
             CALCLINE+=" + ${USDT_TOTAL}"
           fi
           USD_TOTAL="$(echo "${CALCLINE}" | calc)"
+
+          # get and format btc
+          format_output ${USD_TOTAL}
+          BTC_PRICE="${FULL}"
 
           # get and format usd
           format_output ${USD_TOTAL}
