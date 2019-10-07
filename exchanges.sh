@@ -165,7 +165,11 @@ if tty -s || [[ "${CRON}" != "0" ]] || [[ "${SECS}" -eq "15" ]] || [[ "${SECS}" 
             if [[ ! -z "${WORTH}" ]]; then
               OUTPUT+=" (BTC ${WORTH})"
             fi
-            echo "${c} ${OUTPUT}" | output_format
+
+            # output if in terminal
+            if tty -s; then
+              echo "${c} ${OUTPUT}" | output_format
+            fi
           fi
         done
       fi
