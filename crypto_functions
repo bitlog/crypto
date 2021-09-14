@@ -83,7 +83,7 @@ function http_check() {
   tail -1 | grep -q "^200$"
 }
 function mjson() {
-  head -1 | python -mjson.tool 2> /dev/null
+  head -1 | python3 -mjson.tool 2> /dev/null
 }
 function output_format() {
   sed 's/^/  - /' | sed 's/\.0*$//'
